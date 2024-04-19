@@ -53,6 +53,7 @@ router.post('/register', async (req, res) => {
 
         // Send the token in the response
         res.status(201).json({ token });
+        console.log(newUser);
 
     } catch (error) {
         console.error(error);
@@ -65,6 +66,12 @@ function generateToken(user) {
     // Implement JWT token generation logic here
     // For example, you can use the jsonwebtoken package
     // Return the generated token
+    const token = require("jsonwebtoken").sign(
+        { "fullname": user.fullname, "id": user._id, "email": user.email },
+        process.env.SECRET_KEY,
+        { "expiresIn": "1h" }
+      );
+      return token;
 }
 
 module.exports = router;

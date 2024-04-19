@@ -1,4 +1,4 @@
-const { Post } = require("../models/post");
+const  { Post } = require("../models/post.js");
 
 // Class definition for the PostController
 class PostController {
@@ -10,6 +10,8 @@ class PostController {
 
             // Checking if title or description is missing
             if (!title || !description) return res.status(400).json("Please provide title and description");
+
+            if (!req.user || !req.user.id) return res.status(401).json("Unauthorized: No valid user identified");
 
             // Creating a new post with the provided title, user ID, and description
             const post = await Post.create({
@@ -33,7 +35,9 @@ class PostController {
             // Extracting the post ID from the request parameters
             const postId = req.params.id;
 
-            // Implement deletion logic here
+            const result = await Post.findByIdAndDelete(postId);
+
+            if (!result) return res.status(404).json({ message: 'Post not found' });
 
             // Sending a success response after successful deletion
             res.status(200).json({ message: 'Post deleted successfully' });
@@ -50,7 +54,11 @@ class PostController {
             // Extracting the post ID from the request parameters
             const postId = req.params.id;
 
-            // Implement update logic here
+            const { title, description } = req.body;
+
+            const updatedPost = await Post.findByIdAndUpdate(postId, { title, description }, { new: true });
+
+            if (!updatedPost) return res.status(404).json({ message: 'Post not found' });
 
             // Sending a success response after successful update
             res.status(200).json({ message: 'Post updated successfully' });
@@ -67,7 +75,9 @@ class PostController {
             // Extracting the post ID from the request parameters
             const postId = req.params.id;
 
-            // Implement retrieval logic here
+            const post = await Post.findById(postId);
+
+            if (!post) return res.status(404).json({ message: 'Post not found' });
 
             // Sending a success response with the retrieved post
             res.status(200).json({ message: 'Retrieved post by ID' });
@@ -84,7 +94,9 @@ class PostController {
             // Extracting the user ID from the request parameters
             const userId = req.params.userId;
 
-            // Implement retrieval logic here
+            const posts = await Post.find({ userId });
+
+            if (!posts) return res.status(404).json({ message: 'Posts not found' });
 
             // Sending a success response with the retrieved posts
             res.status(200).json({ message: 'Retrieved posts by user ID' });
